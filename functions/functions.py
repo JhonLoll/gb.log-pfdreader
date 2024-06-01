@@ -2,10 +2,9 @@ from pandas import DataFrame
 import pandas as pd
 import openpyxl
 import requests
-import numpy as np
 
 def format_cols(tables):
-    import pandas as pd
+    columns_name = ['REVENDEDORA', 'N.F', 'DESTINO']
     # Converta a tabela especificada para um DataFrame
     df = pd.DataFrame(tables[0])
 
@@ -29,7 +28,7 @@ def format_cols(tables):
     df['REVENDEDORA'] = terceira_coluna + " " + quarta_coluna
 
     # Tratando a coluna Revendedora
-    df['REVENDEDORA'] = df["REVENDEDORA"].str.strip().str.replace("nan", " ")
+    df['REVENDEDORA'] = df["REVENDEDORA"].str.strip()
     
     # Inserindo a coluna com o nome da cidade e estado
     df['DESTINO'] = df.iloc[:, 1].apply(buscar_cidade_uf)
@@ -44,9 +43,13 @@ def format_cols(tables):
     
     remove_columns(df, num_cols)
     
+    
     df_clean = df.dropna(subset=['REVENDEDORA'])
     
     print(df_clean)
+    
+    df = df.iloc[:, [1,0,2]]
+    df.columns = columns_name
     
     save_on_xlsx(df)
 
@@ -72,7 +75,7 @@ def buscar_cidade_uf(cep):
             return None
     else:
         print("CEP Inválido")
-        return None
+        return "nan"
 
 def save_on_xlsx(df):
     wb = openpyxl.Workbook()
@@ -87,6 +90,6 @@ def save_on_xlsx(df):
 
 def remove_columns(df: DataFrame, num_cols: int) -> None:
     values = []
-    for i in range(2, num_cols - 2):
+    for i in range(1, num_cols - 2):
         values.append(i)
     df.drop(df.columns[values], axis=1, inplace=True)
